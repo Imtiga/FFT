@@ -1,0 +1,8 @@
+﻿  main.cpp
+c:\users\admin\source\repos\fft\fft\main.cpp(87): error C3861: “setprecision”: 找不到标识符
+c:\users\admin\source\repos\fft\fft\main.cpp(89): error C3861: “setprecision”: 找不到标识符
+c:\users\admin\source\repos\fft\fft\main.cpp(94): error C3861: “setprecision”: 找不到标识符
+c:\users\admin\source\repos\fft\fft\main.cpp(96): error C3861: “setprecision”: 找不到标识符
+c:\users\admin\source\repos\fft\fft\main.cpp(98): error C3861: “setprecision”: 找不到标识符
+c:\users\admin\source\repos\fft\fft\main.cpp(100): error C3861: “setprecision”: 找不到标识符
+c:\users\admin\source\repos\fft\fft\main.cpp(102): error C3861: “setprecision”: 找不到标识符
