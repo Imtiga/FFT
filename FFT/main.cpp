@@ -33,8 +33,8 @@ public:
 	friend Complex operator+(Complex obj1, double num)
 	{
 		Complex tmp;
-		tmp.real = obj1.real+num;
-		tmp.Imaginary = obj1.Imaginary+num;
+		tmp.real = obj1.real + num;
+		tmp.Imaginary = obj1.Imaginary + num;
 		return Complex(tmp);
 	}
 	friend Complex operator+(double num, Complex obj1)
@@ -44,8 +44,8 @@ public:
 	friend Complex operator-(Complex obj1, double num)
 	{
 		Complex tmp;
-		tmp.real = obj1.real-num;
-		tmp.Imaginary = obj1.Imaginary-num;
+		tmp.real = obj1.real - num;
+		tmp.Imaginary = obj1.Imaginary - num;
 		return Complex(tmp);
 	}
 	friend Complex operator-(double num, Complex obj1)
@@ -140,28 +140,36 @@ double sqrt(Complex obj)
 {
 	return std::sqrt(obj.real*obj.real + obj.Imaginary*obj.Imaginary);
 }
-Complex W(int N,int k)
+Complex W(int N, int k)
 {
 	Complex tmp;
-	tmp.real = cos(2 * PI*k/N);
+	tmp.real = cos(2 * PI*k / N);
 	tmp.Imaginary = -sin(2 * PI*k / N);
 	return tmp;
 }
 //typedef _complex Complex;
-void FFT(Complex a[],int len)
+void FFT(Complex a[], int len)
 {
-	int *pos=new int[len];
-	string str;
-	if (pos == NULL)
-		return;
+	for (int i = 0; i < 8; i++)
+		a[i] = i;
 	int counts = 0;
-	int num = len;
+	int num = len - 1;
 	while (num > 0)
 	{
-		num /= 2;
+		num = num >> 1;
 		counts++;
 	}
-	for (int i = 0; i <= len; i++)
+	int max = pow(2, counts);
+	while (len < max)
+		len++;
+	int *pos = new int[len];
+	Complex *arr1 = new Complex[len];//存放a[pos[i]]的傅里叶变换
+	Complex *arr2 = new Complex[len];//存放基于DFT[a[pos[i]]的当前层傅里叶变换
+	Complex *temp = new Complex[len];
+	string str;
+	if (pos == NULL || arr1==NULL || arr2==NULL || temp==NULL )
+		return;
+	for (int i = 0; i < len; i++)
 	{
 		int count = i;
 		int result = 0;
@@ -181,25 +189,72 @@ void FFT(Complex a[],int len)
 		reverse(str.begin(), str.end());
 		for (int i = 0; i < str.length(); i++)
 			result += (str[i] - 48)*pow(2, i);
-		a[i] = result;
+		pos[i] = result;
 		str.clear();
 	}
-
+	//进行a[pos[i]]的傅里叶变换
+	for (int i = 0; i < len; i++)
+	{
+		arr1[i] = a[pos[i]];
+	}
+	/*
+	一棵叶子数为2^n的满二叉树，它的深度为n
+	在a[pos[i]]的傅里叶变换中，搭建起了这棵二叉树的第n层（假设根结点为第1层）
+	因此，我还需要循环for 1 to n-1，来构建出一个根节点
+	而快速傅里叶变换的原理在于，你只需要构建log2(n)棵满二叉树，并得到它的全部根节点，就可以得到这个序列x(n)的傅里叶变换
+	*/
+	//进行基层的基于arr1[i]的傅里叶变换，得到上一层
+	for (int layer = log2(len); layer >= 1; layer--)
+	{
+		//确定一半点
+		int divide = len >> layer;
+		//确定当前层的N
+		int N = divide << 1;//N=divide*2
+		//计算组数，每层计算的组数应为group=pow(2,layer-1),比如第三层，则要算四组数据
+		int group = pow(2,layer-1);
+		//计算每个二分序列的长度，比如第三层，每个二分序列的长度为1，即len/pow(2,layer)
+		int listlen = divide;
+		int count1 = 0;
+		int count2 = 0;
+		for (int i = 0; i < group; i++)
+		{
+			for (int k=0; k < divide; k++)
+			{
+				arr2[count1] = arr1[count2] + W(N, k)*arr1[count2+divide];
+				arr2[count1+len/2] = arr1[count2] - W(N, k)*arr1[count2+divide];
+				count1++;
+				count2 +=2;
+			}
+		}
+		for (int i = 0; i < len; i++)
+		{
+			arr1[i] = arr2[i];
+			cout << arr2[i] << endl;
+		}
+		memset(arr2, 0, 2*sizeof(double)*len);
+		cout << endl;
+	}
 	return;
 }
 int main()
 {
-	Complex data[7];
-	for (int i = 0; i < 7; i++)
+	/*Complex data[8];
+	for (int i = 0; i < 8; i++)
 		data[i] = i;
-	//FFT(data,7);
-	Complex X3 = W(1, 0) * 0 + W(2, 0)*W(1, 0) * 4;
+	FFT(data,8);*/
+	/*Complex X3 = W(1, 0) * 0 + W(2, 0)*W(1, 0) * 4;
 	Complex X4 = W(1, 0) * 2 + W(2, 0)*W(1, 0) * 6;
 	Complex X5 = W(1, 0) * 1 + W(2, 0)*W(1, 0) * 5;
 	Complex X6 = W(1, 0) * 3 + W(2, 0)*W(1, 0) * 7;
 	Complex X1 = X3 + W(4, 0)*X4;
 	Complex X2 = X5 + W(4, 0)*X6;
 	Complex X = X1 + W(8, 0)*X2;
-	cout<<X<<endl;
+	cout << X << endl;*/
+	int a, b;
+	while (1)
+	{
+		cin >> a >> b;
+		cout << "W(N,k): " << W(a, b) << endl;
+	}
 	return 0;
 }
